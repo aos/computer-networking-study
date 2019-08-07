@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+const recvBufferSize = 2048
+
 func main() {
 
 	if len(os.Args) != 2 {
@@ -16,6 +18,7 @@ func main() {
 	}
 
 	ln, err := net.Listen("tcp", ":"+os.Args[1])
+
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -25,10 +28,23 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		go func(c net.Conn) {
-			fmt.Printf("Client connected: %s\n", c.RemoteAddr())
-			io.Copy(os.Stdout, c)
-			c.Close()
-		}(conn)
+
+		go handleConnection(conn)
 	}
+}
+
+func handleConnection(c net.Conn) {
+	buf := make([]byte, recvBufferSize)
+	for {
+		n, err := c.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				fmt.Print(string(buf[:n]))
+				break
+			}
+			log.Fatalln(err)
+		}
+		fmt.Print(string(buf[:n]))
+	}
+	c.Close()
 }

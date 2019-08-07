@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -21,9 +21,25 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	s, err := bufio.NewReader(conn).ReadString('\n')
-	if err != nil {
-		log.Fatalln(err)
+
+	buf := make([]byte, recvBufferSize)
+	for {
+		n, err := os.Stdin.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				_, err = conn.Write(buf[:n])
+				if err != nil {
+					log.Fatalln(err)
+				}
+				break
+			}
+			log.Fatalln(err)
+		}
+
+		_, err = conn.Write(buf[:n])
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
-	fmt.Print(s)
+	conn.Close()
 }

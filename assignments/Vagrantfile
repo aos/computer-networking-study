@@ -20,9 +20,6 @@ Vagrant.configure(2) do |config|
 
   vagrant_root = File.dirname(__FILE__)
 
-  # Emacs settings
-  config.vm.provision "file", source: "#{vagrant_root}/config_files/dot_emacs", destination: "~/.emacs"
-
   # Jupyter notebook settings
   config.vm.provision "file", source: "#{vagrant_root}/config_files/jupyter_notebook_config.py", destination: "~/.jupyter/jupyter_notebook_config.py"
 

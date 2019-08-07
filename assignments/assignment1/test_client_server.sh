@@ -4,20 +4,20 @@
 ##    test_client_server
 
 # Check correct number of arguments
-if [[ $# -ne 1 ]]; then
+if [[ $# -ne 2 ]]; then
   printf "USAGE: $0 [server port]\n"
   exit
 fi
 
-WORKSPACE=assignment1/.workspace
+WORKSPACE=.workspace
 numCorrect=0
 TESTS_PER_IMPL=5 # REMEBER TO UPDATE THIS IF NUMBER CHANGES!!!
-PORT=$1
+PORT=$2
 testNum=1
 
 # Locations of student and instructor files
-SGC=client
-SGS=server
+SGC=../client
+SGS=../server
 
 # function to compare message files
 # $1 = first file, $2 = second file, $3 = print separator (no if 0, yes otherwise),
