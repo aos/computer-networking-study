@@ -11,13 +11,14 @@ import (
 const recvBufferSize = 2048
 
 func main() {
-
 	if len(os.Args) != 3 {
 		fmt.Println("Wrong number of arguments\nUsage: ./client $IP_ADDR $PORT")
 		os.Exit(1)
 	}
 
 	conn, err := net.Dial("tcp", os.Args[1]+":"+os.Args[2])
+	defer conn.Close()
+
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -40,5 +41,4 @@ func main() {
 		}
 
 	}
-	conn.Close()
 }
