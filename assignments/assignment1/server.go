@@ -37,14 +37,16 @@ func handleConnection(c net.Conn) {
 	buf := make([]byte, recvBufferSize)
 	for {
 		n, err := c.Read(buf)
+		if n > 0 {
+			fmt.Print(string(buf[:n]))
+		}
+
 		if err != nil {
 			if err == io.EOF {
-				fmt.Print(string(buf[:n]))
 				break
 			}
 			log.Fatalln(err)
 		}
-		fmt.Print(string(buf[:n]))
 	}
 	c.Close()
 }

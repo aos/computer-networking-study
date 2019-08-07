@@ -25,21 +25,20 @@ func main() {
 	buf := make([]byte, recvBufferSize)
 	for {
 		n, err := os.Stdin.Read(buf)
+		if n > 0 {
+			_, err = conn.Write(buf[:n])
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+
 		if err != nil {
 			if err == io.EOF {
-				_, err = conn.Write(buf[:n])
-				if err != nil {
-					log.Fatalln(err)
-				}
 				break
 			}
 			log.Fatalln(err)
 		}
 
-		_, err = conn.Write(buf[:n])
-		if err != nil {
-			log.Fatalln(err)
-		}
 	}
 	conn.Close()
 }
