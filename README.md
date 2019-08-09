@@ -14,7 +14,7 @@ that implement various RFCs or play around with Wireshark.
 Standard advice says that I should be using [Computer Networking: A Top-down
 Approach](http://ce.sharif.edu/courses/94-95/2/ce443-3/resources/root/Book/fqo47.Computer.Networking.A.TopDown.Approach.6th.Edition.pdf). [**PDF warning**]
 
-Assigned readings:
+Readings:
 - [ ] Unit 1: Sections 1.1-1.3; 1.5; 2.1
 - [ ] Unit 2: Sections 3.1-3.5
 - [ ] Unit 3: pp. 22-31; 640-648

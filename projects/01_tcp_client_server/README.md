@@ -1,4 +1,4 @@
-# Assignment 1: Socket Programming
+# TCP Client and Server
 
 As discussed in lecture, socket programming is the standard way to write programs that communicate over a network. While originally developed for Unix computers programmed in C, the socket abstraction is general and not tied to any specific operating system or programming language. This allows programmers to use the socket mental model to write correct network programs in many contexts.
 
