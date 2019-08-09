@@ -46,7 +46,7 @@ int main(void)
   socklen_t sin_size;
   struct sigaction sa;
   int yes = 1;
-  char s[INET6_ADDRSTRLEN];
+  char s[INET6_ADDRSTRLEN]; // client's internet address
   int rv;
 
   memset(&hints, 0, sizeof hints);
@@ -117,7 +117,8 @@ int main(void)
       s, sizeof s);
     printf("server: got connection from %s\n", s);
 
-    if (!fork()) { // this is the child process
+    // this is the child process, fork() returns 0 on success
+    if (!fork()) {
       close(sockfd); // child doesn't need the listener
       if (send(new_fd, "Hello, world!", 13, 0) == -1) perror("send");
       close(new_fd);

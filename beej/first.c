@@ -27,6 +27,7 @@ struct sockaddr_in {
   unsigned char       sin_zero[8];  // Same size as struct sockaddr
 };
 
+// A whole struct for an int... a bit historical
 struct in_addr {
   uint32_t s_addr;  // 32-bit int (4 bytes)
 };

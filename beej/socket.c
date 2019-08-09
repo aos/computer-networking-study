@@ -32,8 +32,8 @@ if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1) {
   exit(1);
 }
 
-// 5.4 connect() -- connecting to a remote host
-// the kernel will choose a local port fo us, we only care about
+// 5.4 connect() -- connecting to a remote host (AS A CLIENT)
+// the kernel will choose a local port for us, we only care about
 // the remote port
 // serv_addr -> destination port and IP address
 int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
@@ -41,7 +41,7 @@ int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
 // 5.5 listen()
 // wait for incoming connections and handle them:
 // 1. listen(), 2. accept()
-// backlog -> number of connections allows on the incoming queue
+// backlog -> number of connections allowed on the incoming queue
 // incoming connections are going to wait in queue until you accept()
 int listen(int sockfd, int backlog);
 
