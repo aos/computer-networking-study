@@ -2,12 +2,16 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net"
 	"os"
 )
 
+// Proxy starts and listens to connections on specified $PORT
+// The proxy listens for properly formatted HTTP requests from the client
+// Each client is handled separately
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("Wrong number of arguments\nUsage: ./proxy $PORT")
@@ -29,11 +33,27 @@ func main() {
 	}
 }
 
+// 1. Create the client's request
+// 2. Parse the URL into: host, port, requested path
+// 3. Connect to remote server using host:port
+// 4. Send a properly formatted HTTP request using requested path
+// 5. Return results to client
 func handleConnection(c net.Conn) {
 	defer c.Close()
 
 	fmt.Printf("Connected to client: %s\n", c.RemoteAddr())
-	req := CreateRequest(c)
+	req := *CreateRequest(c)
 
-	fmt.Printf("Request received:\n%v\n", req)
+	fmt.Printf("Request received:\n%+v\n", req)
+
+	reqConn, err := net.Dial("tcp", req.ParsedURL.Host)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Fprintf(reqConn, fmt.Sprintf("%s %v HTTP/1.0\r\n\r\n", req.Method, req.ParsedURL.Path))
+	status, err := bufio.NewReader(reqConn).ReadString('\n')
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(status)
 }

@@ -4,16 +4,17 @@ import (
 	"bufio"
 	"log"
 	"net"
+	"net/url"
 	"strings"
 )
 
 // Request holds all parts of the request being sent
-// optional
+// The parsed URL is of type URL, which holds scheme, host, path, query
 type Request struct {
-	Method     string
-	RequestURI string
-	Headers    map[string]string
-	Body       string
+	Method    string
+	ParsedURL url.URL
+	Headers   map[string]string
+	Body      string
 }
 
 // CreateRequest creates a request struct with all the fields, given a Conn
@@ -44,9 +45,30 @@ func CreateRequest(c net.Conn) *Request {
 			// TODO: Malformed request
 			// TODO: Check for POST requests
 			req.Method = received[0]
-			req.RequestURI = received[1]
-			// TODO: Parse headers
+
+			// We need to add a scheme to the URL if it doesn't
+			// have one because url.Parse() will not parse the
+			// hostname correctly (as per RFC 3986)
+			if !strings.HasPrefix(received[1], "//") {
+				received[1] = "http://" + received[1]
+			}
+
+			parsedURL, err := url.Parse(received[1])
+			if err != nil {
+				log.Fatalln("Incorrectly formatted URL")
+			}
+			req.ParsedURL = *parsedURL
+
+			// Default to absolute path if none given
+			if req.ParsedURL.Path == "" {
+				req.ParsedURL.Path = "/"
+			}
+			// Rebuild host to include port 80 if missing
+			if req.ParsedURL.Port() == "" {
+				req.ParsedURL.Host = req.ParsedURL.Host + ":80"
+			}
 		}
+		// TODO: Parse headers
 		// Do other things (after second CRLF)
 		// TODO: Parse body if POST
 		break
