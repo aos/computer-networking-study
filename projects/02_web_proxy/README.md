@@ -56,9 +56,11 @@ From a Unix prompt, type:
 This opens a TCP connection to the server at www.yahoo.com listening on port
 80- the default HTTP port. You should see something like this:
 
-<pre>Trying 209.131.36.158...
+```
+Trying 209.131.36.158...
 Connected to www.yahoo.com (209.131.36.158).
-Escape character is '^]'.</pre>
+Escape character is '^]'.
+```
 
 type the following:
 
@@ -66,7 +68,8 @@ type the following:
 
 and hit enter twice. You should see something like the following:
 
-<pre>HTTP/1.1 200 OK
+```
+HTTP/1.1 200 OK
 Date: Fri, 10 Nov 2006 20:31:19 GMT
 Connection: close
 Content-Type: text/html; charset=utf-8
@@ -74,7 +77,8 @@ Content-Type: text/html; charset=utf-8
 <html><head>
 <title>Yahoo!</title>
 (More HTML follows)
-</pre>
+```
+
 
 There may be some additional pieces of header information as well- setting
 cookies, instructions to the browser or proxy on caching behavior, etc. What
@@ -196,13 +200,14 @@ Run your client with the following command:
 `./proxy <port>`, where `port` is the port number that the proxy should listen
 on. As a basic test of functionality, try requesting a page using telnet:
 
-<pre>telnet localhost <port>
+```
+telnet localhost <port>
 Trying 127.0.0.1...
 Connected to localhost.localdomain (127.0.0.1).
 Escape character is '^]'.
 GET http://www.google.com HTTP/1.0
 
-</pre>
+```
 
 If your proxy is working correctly, the headers and HTML of the Google homepage
 should be displayed on your terminal screen.
