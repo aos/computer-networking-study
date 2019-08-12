@@ -2,8 +2,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -44,16 +44,15 @@ func handleConnection(c net.Conn) {
 	fmt.Printf("Connected to client: %s\n", c.RemoteAddr())
 	req := *CreateRequest(c)
 
-	fmt.Printf("Request received:\n%+v\n", req)
-
 	reqConn, err := net.Dial("tcp", req.ParsedURL.Host)
+	defer reqConn.Close()
+
 	if err != nil {
 		log.Fatalln(err)
 	}
 	fmt.Fprintf(reqConn, fmt.Sprintf("%s %v HTTP/1.0\r\n\r\n", req.Method, req.ParsedURL.Path))
-	status, err := bufio.NewReader(reqConn).ReadString('\n')
+	_, err = io.Copy(os.Stdout, reqConn)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(status)
 }

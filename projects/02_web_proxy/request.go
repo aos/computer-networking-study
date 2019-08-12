@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+var supportedMethods = map[string]bool{
+	"GET":  true,
+	"HEAD": true,
+	"POST": true,
+}
+
 // Request holds all parts of the request being sent
 // The parsed URL is of type URL, which holds scheme, host, path, query
 type Request struct {
@@ -35,31 +41,33 @@ func CreateRequest(c net.Conn) *Request {
 
 	for s.Scan() {
 		countCrlf++
-		// Get the request line
+		receivedText := s.Text()
+		// Parse the Request-line
 		if countCrlf == 1 {
-			line := s.Text()
-			received := strings.Split(line, " ")
+			received := strings.Split(receivedText, " ")
 			if len(received) < 3 {
 				log.Fatalln("Incorrectly formatted request")
 			}
-			// TODO: Malformed request
-			// TODO: Check for POST requests
 			req.Method = received[0]
+			if _, ok := supportedMethods[req.Method]; !ok {
+				log.Fatalln("Unsupported method:", req.Method)
+			}
 
 			// We need to add a scheme to the URL if it doesn't
 			// have one because url.Parse() will not parse the
-			// hostname correctly (as per RFC 3986)
+			// hostname correctly (as per RFC 3986, section 3)
 			if !strings.HasPrefix(received[1], "//") {
 				received[1] = "http://" + received[1]
 			}
 
 			parsedURL, err := url.Parse(received[1])
 			if err != nil {
-				log.Fatalln("Incorrectly formatted URL")
+				log.Fatalln("Incorrectly formatted URL", err)
 			}
 			req.ParsedURL = *parsedURL
 
 			// Default to absolute path if none given
+			// RFC 1945 (section 5.1.2)
 			if req.ParsedURL.Path == "" {
 				req.ParsedURL.Path = "/"
 			}
@@ -67,11 +75,31 @@ func CreateRequest(c net.Conn) *Request {
 			if req.ParsedURL.Port() == "" {
 				req.ParsedURL.Host = req.ParsedURL.Host + ":80"
 			}
+			continue
 		}
-		// TODO: Parse headers
-		// Do other things (after second CRLF)
+		if countCrlf == 2 && receivedText != "" {
+			req.Headers = createHeaderMap(receivedText)
+			continue
+		}
 		// TODO: Parse body if POST
+		if req.Method == "POST" {
+
+		}
 		break
 	}
 	return &req
+}
+
+func createHeaderMap(headerString string) (headerMap map[string]string) {
+	splitHeader := strings.Split(headerString, "\n")
+	for _, header := range splitHeader {
+		key, value := splitColonHeader(header)
+		headerMap[key] = value
+	}
+	return
+}
+
+func splitColonHeader(header string) (string, string) {
+	split := strings.SplitN(header, ":", 2)
+	return split[0], split[1]
 }
