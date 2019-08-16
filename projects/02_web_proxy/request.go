@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -57,7 +58,7 @@ func CreateRequest(c net.Conn) *Request {
 			// have one because url.Parse() will not parse the
 			// hostname correctly (as per RFC 3986, section 3)
 			if !strings.HasPrefix(received[1], "//") {
-				received[1] = "http://" + received[1]
+				received[1] = "https://" + received[1]
 			}
 
 			parsedURL, err := url.Parse(received[1])
@@ -77,26 +78,31 @@ func CreateRequest(c net.Conn) *Request {
 			}
 			continue
 		}
-		if countCrlf == 2 && receivedText != "" {
-			req.Headers = createHeaderMap(receivedText)
+		if countCrlf == 2 && receivedText != "\r\n" {
+			req.Headers = createHeaderMap(receivedText[:len(receivedText)-2])
 			continue
 		}
-		// TODO: Parse body if POST
-		if req.Method == "POST" {
-
+		// The Content-Length header is required 100% in POST requests
+		if req.Method == "POST" && receivedText != "\r\n" {
+			bodyLength := len(receivedText) - 2
+			req.Body = receivedText[:bodyLength]
+			req.Headers["Content-Length"] = strconv.Itoa(bodyLength)
 		}
 		break
 	}
 	return &req
 }
 
-func createHeaderMap(headerString string) (headerMap map[string]string) {
+func createHeaderMap(headerString string) map[string]string {
 	splitHeader := strings.Split(headerString, "\n")
+	headerMap := make(map[string]string)
 	for _, header := range splitHeader {
-		key, value := splitColonHeader(header)
-		headerMap[key] = value
+		if strings.Contains(header, ":") {
+			key, value := splitColonHeader(header)
+			headerMap[key] = value
+		}
 	}
-	return
+	return headerMap
 }
 
 func splitColonHeader(header string) (string, string) {

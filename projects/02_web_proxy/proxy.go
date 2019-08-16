@@ -1,4 +1,7 @@
 // A web proxy built using RFC1945
+// Note: this only supports HTTP/1.0 -- meaning this won't work with a
+// web browser because most web browsers now use the CONNECT method defined in
+// HTTP/1.1 (RFC7231)
 package main
 
 import (
@@ -7,6 +10,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 )
 
 // Proxy starts and listens to connections on specified $PORT
@@ -50,9 +54,30 @@ func handleConnection(c net.Conn) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Fprintf(reqConn, fmt.Sprintf("%s %v HTTP/1.0\r\n\r\n", req.Method, req.ParsedURL.Path))
-	_, err = io.Copy(os.Stdout, reqConn)
+	passedRequest := buildPassedRequest(req)
+
+	reqConn.Write([]byte(passedRequest))
+	_, err = io.Copy(c, reqConn)
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func buildPassedRequest(r Request) string {
+	headerString := rebuildHeaderString(r.Headers)
+	return fmt.Sprintf(
+		"%s %v HTTP/1.0\r\n%s\r\n%s",
+		r.Method,
+		r.ParsedURL.Path,
+		headerString,
+		r.Body,
+	)
+}
+
+func rebuildHeaderString(r map[string]string) string {
+	var sb strings.Builder
+	for key, value := range r {
+		sb.WriteString(fmt.Sprintf("%s:%s\n", key, value))
+	}
+	return sb.String()
 }
