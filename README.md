@@ -3,7 +3,8 @@
 Since computer networking is a vast and deep subject, I wanted to at least get
 a start understanding how it all works under the hood. I also wanted to take a
 programming approach as it seems like the standard advice is to build projects
-that implement various RFCs or play around with Wireshark.
+that implement various RFCs or play around with Wireshark. I will also be using
+this as an opportunity to dive deep into Go.
 
 1. [Beej's Guide to Networking Programming](http://beej.us/guide/bgnet/)
 2. Stanford's [Introduction to Computer Networking](https://lagunita.stanford.edu/courses/Engineering/Networking-SP/SelfPaced/)

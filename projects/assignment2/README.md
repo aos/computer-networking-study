@@ -1,45 +1,91 @@
 # Assignment 2: Intradomain Routing Algorithms
 
-### Due March 4th, 5:00pm
+The Internet is composed of many independent networks (called autonomous
+systems) that must cooperate in order for packets to reach their destinations.
+This necessitates different protocols and algorithms for routing packet within
+autonomous systems, where all routers are operated by the same entity, and
+between autonomous systems, where business agreements and other policy
+considerations affect routing decisions.
 
-The Internet is composed of many independent networks (called autonomous systems) that must cooperate in order for packets to reach their destinations.  This necessitates different protocols and algorithms for routing packet within autonomous systems, where all routers are operated by the same entity, and between autonomous systems, where business agreements and other policy considerations affect routing decisions.
+This assignment focuses on intradomain routing algorithms used by routers
+within a single autonomous system (AS). The goal of intradomain routing is
+typically to forward packets along the shortest or lowest cost path through the
+network.
 
-This assignment focuses on intradomain routing algorithms used by routers within a single autonomous system (AS). The goal of intradomain routing is typically to forward packets along the shortest or lowest cost path through the network.
+The need to rapidly handle unexpected router or link failures, changing link
+costs (usually depending on traffic volume), and connections from new routers
+and clients, motivates the use of distributed algorithms for intradomain
+routing.  In these distributed algorithms, routers start with only their local
+state and must communicate with each other to learn lowest cost paths.
 
-The need to rapidly handle unexpected router or link failures, changing link costs (usually depending on traffic volume), and connections from new routers and clients, motivates the use of distributed algorithms for intradomain routing.  In these distributed algorithms, routers start with only their local state and must communicate with each other to learn lowest cost paths.
-
-Nearly all intradomain routing algorithms used in real-world networks fall into one of two categories, distance-vector or link-state.  In this assignment, you will implement distributed  distance-vector and link-state routing algorithms in Python and test them with a provided network simulator.
-
-**You should work with a partner.** The Piazza "search for teammates" feature is active for this assignment. See "Submission and Grading" below for partner submission details.  
+Nearly all intradomain routing algorithms used in real-world networks fall into
+one of two categories, distance-vector or link-state.  In this assignment, you
+will implement distributed  distance-vector and link-state routing algorithms
+in Python and test them with a provided network simulator.
 
 ## Background Reading
-Begin by reading pages 240-258 in the textbook *Computer Networks: A Systems Approach* (5th edition) by Peterson & Davie.  An excerpt of these pages is included in the `assignment2` directory with the filename `textbook_reading.pdf`. There is also a copy of the textbook in the Friend library.
+Begin by reading pages 240-258 in the textbook *Computer Networks: A Systems
+Approach* (5th edition) by Peterson & Davie.  An excerpt of these pages is
+included in the `assignment2` directory with the filename
+`textbook_reading.pdf`. There is also a copy of the textbook in the Friend
+library.
 
-This reading provides enough information to design both the distance-vector and link-state routing algorithms. Be sure you understand how both algorithms work before starting to code. The box at the bottom of page 258 summarizes the difference between the two algorithms (reprinted here):
+This reading provides enough information to design both the distance-vector and
+link-state routing algorithms. Be sure you understand how both algorithms work
+before starting to code. The box at the bottom of page 258 summarizes the
+difference between the two algorithms (reprinted here):
 
-  "In distance-vector, each node talks only to its directly connected neighbors, but it tells them everything it has learned (i.e. distance to all nodes).  In link-state, each node talks to all other nodes, but it tells them only what it knows for sure (i.e. only the state of its directly connected links)."
+  "In distance-vector, each node talks only to its directly connected
+  neighbors, but it tells them everything it has learned (i.e. distance to all
+  nodes).  In link-state, each node talks to all other nodes, but it tells them
+  only what it knows for sure (i.e. only the state of its directly connected
+  links)."
 
 ## Provided code
 
 ### Download
-Open your terminal and `cd` into the `<>/assignments` directory you downloaded in Assignment 1. Run the command `git pull` to download the code for this assignment.
+Open your terminal and `cd` into the `<>/assignments` directory you downloaded
+in Assignment 1. Run the command `git pull` to download the code for this
+assignment.
 
-Run `vagrant reload --provision` to install the needed libraries for this assignment and start the VM (no need to run `vagrant up` in addition).
+Run `vagrant reload --provision` to install the needed libraries for this
+assignment and start the VM (no need to run `vagrant up` in addition).
 
-Then run `vagrant ssh` and `cd /vagrant` to enter the virtual machine just as you did in Assignment 1.  The provided code is located in the `/vagrant/assignments/assignment2` directory of your vagrant VM.
+Then run `vagrant ssh` and `cd /vagrant` to enter the virtual machine just as
+you did in Assignment 1.  The provided code is located in the
+`/vagrant/assignments/assignment2` directory of your vagrant VM.
 
 ### Familiarize yourself with the network simulator
-The provided code implements a network simulator that abstracts away many details of a real network, allowing you to focus on intradomain routing algorithms.  Each `.json` file in the `assignment2` directory is the specification for a different network simulation with different numbers of routers, links, and link costs. Some of these simulations also contain link additions and/or failures that will occur at pre-specified times.  
+The provided code implements a network simulator that abstracts away many
+details of a real network, allowing you to focus on intradomain routing
+algorithms.  Each `.json` file in the `assignment2` directory is the
+specification for a different network simulation with different numbers of
+routers, links, and link costs. Some of these simulations also contain link
+additions and/or failures that will occur at pre-specified times.  
 
-The network simulator can be run with or without a graphical interface. For example, the command `python visualize_network.py 01_small_net.json` will run the simulator on a simple network with 2 routers and 3 clients. The default router implementation returns all traffic back out the link on which it arrives. This is obviously a terrible routing algorithm, which your implementations will fix.
+The network simulator can be run with or without a graphical interface. For
+example, the command `python visualize_network.py 01_small_net.json` will run
+the simulator on a simple network with 2 routers and 3 clients. The default
+router implementation returns all traffic back out the link on which it
+arrives. This is obviously a terrible routing algorithm, which your
+implementations will fix.
 
-The network architecture is shown on the left side of the visualization. Routers are colored red, clients are colored blue. Each client periodically sends gray traceroute-like packets addressed to every other client in the network. These packets remember the sequence of routers they traverse, and the most recent route taken to each client is printed in the text box on the top right. This is an important debugging tool.
+The network architecture is shown on the left side of the visualization.
+Routers are colored red, clients are colored blue. Each client periodically
+sends gray traceroute-like packets addressed to every other client in the
+network. These packets remember the sequence of routers they traverse, and the
+most recent route taken to each client is printed in the text box on the top
+right. This is an important debugging tool.
 
 The cost of each link is printed on the connections.
 
-Clicking on a client hides all packets except those addressed to that client, so you can see the path chosen by the routers. Clicking on the client again will go back to showing all packets.
+Clicking on a client hides all packets except those addressed to that client,
+so you can see the path chosen by the routers. Clicking on the client again
+will go back to showing all packets.
 
-Clicking on a router causes a string about that router to print in the text box on the lower right. You will be able to set the contents of this string for debugging your router implementations.
+Clicking on a router causes a string about that router to print in the text box
+on the lower right. You will be able to set the contents of this string for
+debugging your router implementations.
 
 The same network simulation can be run without the graphical interface by the command `python network.py 01_small_net.json`. The simulation will run faster without having to go at visualizable speed. It will stop after a predetermined amount of time, print the final routes taken by the traceroute packets to and from all clients and whether these routes are correct given the known lowest-cost paths through the network.
 
