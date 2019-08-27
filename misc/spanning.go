@@ -4,7 +4,6 @@ package main
 import (
 	"fmt"
 	"reflect"
-	"sync"
 )
 
 type Node struct {
@@ -13,7 +12,6 @@ type Node struct {
 	Root     *Node
 	Distance int
 	Msgs     chan Message
-	mu       sync.Mutex
 }
 
 type Message struct {
@@ -29,16 +27,19 @@ var NodeList = make(map[string]struct {
 
 // Send sends messages to other nodes
 func (n *Node) Send() {
-	neighbors := NodeList[n.Name].Neighbors
-	message := Message{
-		Address:  n.Address,
-		Root:     n.Root,
-		Distance: n.Distance + 1,
-	}
+	for {
+		neighbors := NodeList[n.Name].Neighbors
+		message := Message{
+			Address:  n.Address,
+			Root:     n.Root,
+			Distance: n.Distance + 1,
+		}
 
-	for _, neighborName := range neighbors {
-		neighborNode := NodeList[neighborName].n
-		neighborNode.Msgs <- message
+		for _, neighborName := range neighbors {
+			neighborNode := NodeList[neighborName].n
+			neighborNode.Msgs <- message
+		}
+
 	}
 }
 
@@ -46,11 +47,9 @@ func (n *Node) Send() {
 func (n *Node) Receive() {
 	for {
 		msg := <-n.Msgs
-		if msg.Address < n.Address {
-			n.mu.Lock()
+		if msg.Address < n.Address && msg.Root != n.Root {
 			n.Root = msg.Root
 			n.Distance = msg.Distance
-			n.mu.Unlock()
 			fmt.Printf(
 				"%s -- updated root to: %s\tupdated distance to: %d\n",
 				n.Name, n.Root.Name, n.Distance)
@@ -70,7 +69,7 @@ func init() {
 
 	for i, v := range reflect.ValueOf(adjacencyList).MapKeys() {
 		name := v.String()
-		msgChan := make(chan Message, 2)
+		msgChan := make(chan Message)
 		node := Node{Name: name, Address: i, Distance: 0, Msgs: msgChan}
 		node.Root = &node
 
@@ -85,17 +84,18 @@ func main() {
 	// Each node sends periodic updates to neighbors with:
 	// Message: its address, address of root, distance to root
 	for _, node := range NodeList {
-		fmt.Printf("%+v\n", node.n)
+		fmt.Printf("Node: %v, Address: %d, Distance: %d\n",
+			node.n.Name, node.n.Address, node.n.Distance)
 	}
 
-	for i := 0; i < 5; i++ {
+	for {
 		for _, node := range NodeList {
 			go func(n *Node) {
-				n.Receive()
+				n.Send()
 			}(&(node.n))
 
 			go func(n *Node) {
-				n.Send()
+				n.Receive()
 			}(&(node.n))
 		}
 	}
