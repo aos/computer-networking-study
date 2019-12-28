@@ -11,7 +11,8 @@ type Node struct {
 	Address  int
 	Root     *Node
 	Distance int
-	Msgs     chan Message
+	Receives <-chan Message
+	Sends    chan<- Message
 }
 
 type Message struct {
