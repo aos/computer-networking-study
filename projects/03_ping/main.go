@@ -34,12 +34,18 @@ func main() {
 	//	0x00,		// (optional payload)
 	//}
 	// identifier := []byte{0x2C, 0xCC}
-	//go func(conn *net.IPConn) {
-	//	for {
-	//	}
-	//}(conn)
+	go func(conn *net.IPConn) {
+		buf := make([]byte, 1024)
+		for {
+			numRead, _, err := conn.ReadFrom(buf)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println("Number of bytes returned", numRead)
+			fmt.Printf("% X\n", buf[:numRead])
+		}
+	}(conn)
 
-	buf := make([]byte, 1024)
 	for {
 		icmpPacket := []byte{
 			0x08, 0x00,
@@ -60,13 +66,6 @@ func main() {
 			panic(err)
 		}
 		fmt.Printf("Written %d bytes to %s\n", n, conn.RemoteAddr().String())
-
-		numRead, _, err := conn.ReadFrom(buf)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println("Number of bytes returned", numRead)
-		fmt.Printf("% X\n", buf[:numRead])
 
 		time.Sleep(1 * time.Second)
 	}
