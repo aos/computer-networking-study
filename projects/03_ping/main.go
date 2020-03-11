@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"net"
 	"os"
@@ -26,14 +27,14 @@ func main() {
 
 	// Structure of an ICMP packet
 	// []byte{
-	//	0x08,		// ICMP type (echo request)
-	//	0x00,		// ICMP subtype
+	//	0x08, 0x00,	// ICMP type (echo request), subtype
 	//	0x00, 0x00,	// Checksum (2 bytes)
 	//	0x00, 0x00,	// Identifier (2 bytes)
 	//	0x00, 0x00,	// Sequence number (2 bytes)
-	//	0x00,		// (optional payload)
+	//	0x00, ...	// (optional payload)
 	//}
-	// identifier := []byte{0x2C, 0xCC}
+	identifier := []byte{0x0A, 0x41}
+
 	go func(conn *net.IPConn) {
 		buf := make([]byte, 1024)
 		for {
@@ -46,8 +47,23 @@ func main() {
 		}
 	}(conn)
 
+	i := 0
 	for {
 		icmpPacket := []byte{
+			0x08, 0x00, // type and subtype
+			0x00, 0x00, // checksum
+		}
+		seqNum := []byte{0x00, 0x00}
+		icmpPacket = append(icmpPacket, identifier...)
+		icmpPacket = append(icmpPacket, seqNum...)
+
+		// Time
+		varIntBuf := make([]byte, 8)
+		n := binary.PutVarint(varIntBuf, time.Now().Unix())
+
+		icmpPacket = append(icmpPacket, varIntBuf...)
+
+		icmpPacket = []byte{
 			0x08, 0x00,
 			0x28, 0x3B,
 			0x2C, 0xCC,
