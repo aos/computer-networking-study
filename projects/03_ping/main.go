@@ -24,6 +24,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 
 	// Structure of an ICMP packet
 	// []byte{
@@ -33,56 +34,54 @@ func main() {
 	//	0x00, 0x00,	// Sequence number (2 bytes)
 	//	0x00, ...	// (optional payload)
 	//}
-	identifier := []byte{0x0A, 0x41}
 
-	go func(conn *net.IPConn) {
-		buf := make([]byte, 1024)
-		for {
-			numRead, _, err := conn.ReadFrom(buf)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println("Number of bytes returned", numRead)
-			fmt.Printf("% X\n", buf[:numRead])
-		}
-	}(conn)
+	identifier := uint16(0x0A41)
+	go ReadEchoReply(conn, identifier)
 
-	i := 0
+	seqNum := uint16(1)
+	fmt.Printf("PING %s (%s) %d(%d) bytes of data.\n",
+		host, conn.RemoteAddr().String(), 16, 32,
+	)
 	for {
-		icmpPacket := []byte{
-			0x08, 0x00, // type and subtype
-			0x00, 0x00, // checksum
-		}
-		seqNum := []byte{0x00, 0x00}
-		icmpPacket = append(icmpPacket, identifier...)
-		icmpPacket = append(icmpPacket, seqNum...)
+		icmpPacket := AssembleICMP(
+			8, 0, identifier, seqNum, time.Now().UnixNano(),
+		)
 
-		// Time
-		varIntBuf := make([]byte, 8)
-		n := binary.PutVarint(varIntBuf, time.Now().Unix())
-
-		icmpPacket = append(icmpPacket, varIntBuf...)
-
-		icmpPacket = []byte{
-			0x08, 0x00,
-			0x28, 0x3B,
-			0x2C, 0xCC,
-			0x00, 0x01,
-			0x4F, 0x93, 0x65, 0x5E,
-			0x00, 0x00, 0x00, 0x00,
-			0x25, 0x33, 0x0A, 0x00,
-			0x00, 0x00, 0x00, 0x00,
-			0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19,
-			0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23,
-			0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D,
-			0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
-		}
-		n, err := conn.Write(icmpPacket)
+		_, err := conn.Write(icmpPacket)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Written %d bytes to %s\n", n, conn.RemoteAddr().String())
 
 		time.Sleep(1 * time.Second)
+		seqNum++
+	}
+}
+
+// ReadEchoReply reads the echo reply from the sent packet
+func ReadEchoReply(conn *net.IPConn, identifier uint16) {
+	buf := make([]byte, 1024)
+	for {
+		conn.SetReadDeadline(time.Now().Add(time.Second * 5))
+		numRead, err := conn.Read(buf)
+		if err != nil {
+			panic(err)
+		}
+
+		// Extract ICMP reply from IP packet
+		icmpReply := buf[20:numRead]
+
+		if identifier != binary.BigEndian.Uint16(icmpReply[4:6]) {
+			fmt.Println("Incorrect identifer!")
+		}
+
+		timePacket := int64(binary.BigEndian.Uint64(icmpReply[8:16]))
+		timeNano := time.Since(time.Unix(0, timePacket)).Nanoseconds()
+		fmt.Printf(
+			"-- %d bytes from %s: icmp_seq=%d time=%.2f ms\n",
+			len(icmpReply),
+			conn.RemoteAddr().String(),
+			binary.BigEndian.Uint16(icmpReply[6:8]),
+			float64(timeNano)/1000000,
+		)
 	}
 }
