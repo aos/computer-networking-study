@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 struct addrinfo {
   int             ai_flags;       // AI_PASSIVE, AI_CANONNAME, etc.
@@ -34,11 +35,11 @@ struct in_addr {
 
 // IPv6
 struct sockaddr_in6 {
-  u_int16_t       sin6_family;   // Address family, AF_INET6
-  u_int16_t       sin6_port;     // Port number, Network Byte Order
-  u_int32_t       sin6_flowinfo; // IPv6 flow information
+  uint16_t       sin6_family;   // Address family, AF_INET6
+  uint16_t       sin6_port;     // Port number, Network Byte Order
+  uint32_t       sin6_flowinfo; // IPv6 flow information
   struct in6_addr *sin6_addr;    // IPv6 address
-  u_int32_t       sin6_scope_id; // Scope ID
+  uint32_t       sin6_scope_id; // Scope ID
 };
 
 struct in6_addr {

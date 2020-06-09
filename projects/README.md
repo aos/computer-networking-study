@@ -1,4 +1,10 @@
-# Princeton University COS 461: Computer Networks
+## Projects
+
+This section contains my small projects, as well as a copy of the Princeton COS
+461: Computer Networks projects. Any directory labeled `#_<assignment_name>`
+means I have finished or started working on it.
+
+### Princeton University COS 461: Computer Networks
 
 **NOTE**: The following assignments have been officially released. We advise against starting early on (last year's) assignments in the repository that haven't been officially released as these are still subject to change.
 

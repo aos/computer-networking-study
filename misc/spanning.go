@@ -1,4 +1,5 @@
 // Spanning tree construction for multiple nodes
+// This is a WIP, still sort of broken
 package main
 
 import (
