@@ -1,9 +1,9 @@
 package main
 
-// Checksum receives a byte slice and returns the uint16 ones's complement of
+// Checksum receives a byte slice and returns the uint16 one's complement of
 // the one's complement of the sum of all 16-bit words
 func Checksum(data []byte) uint16 {
-	// Append a byte of zeroes because we're dealing with uint16
+	// Pad retrieved bytes to even length
 	if len(data)%2 != 0 {
 		data = append(data, 0x00)
 	}

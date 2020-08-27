@@ -35,6 +35,8 @@ func main() {
 	//	0x00, ...	// (optional payload)
 	//}
 
+	// We send a unique identifier that we match against the reply
+	// echo replies should always return the same identifier we sent
 	identifier := uint16(0x0A41)
 	go ReadEchoReply(conn, identifier)
 
