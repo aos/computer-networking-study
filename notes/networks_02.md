@@ -25,6 +25,29 @@
 ## Signal Propagation
 
 Bits are transmitted over a wire as analog signals. Over time it is represented
-as by its frequency components (called a Fourier analysis). The more bandwidth
+by its frequency components (called a Fourier analysis). The more bandwidth
 we have (EE term, the more frequencies), the higher the fidelity of the signal,
 and we are better able to see the voltage high/low.
+
+Wireless signals attenuate greatly over distance (`1 / d^2`).
+
+## Modulation
+
+- Clock recovery 4B/5B - map every 4 data bits into 5 code bits without long runs
+of zeroes.
+
+- Passband modulation - the carrier frequency is changed via either amplitude,
+frequency, or phase shift.
+
+## Limits
+
+> (how rapidly can we send information over a link?)
+
+Channel propertiers:
+1. bandwidth (B)
+2. signal strength (S)
+3. noise strength (N)
+
+- Nyquist limit: maximum symbol rate is 2B
+- Shannon capacity: number of signal levels we can distinguish is based on
+    Signal-to-Noise ratio
