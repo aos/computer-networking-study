@@ -51,3 +51,52 @@ Channel propertiers:
 - Nyquist limit: maximum symbol rate is 2B
 - Shannon capacity: number of signal levels we can distinguish is based on
     Signal-to-Noise ratio
+
+## Framing
+
+1. Byte counts (difficult to synchronize after an error)
+2. Byte stuffing - special flag byte that means start/end of frame (must be
+   escaped)
+
+## Error Correction
+
+1. Error detection codes - check bits
+2. Error correction codes
+
+- Using codewords (systematic block codes): consist of `D` data plus `R` check
+  bits. `R = fn(D)`
+
+
+### Hamming Distance
+
+Distance: number of bit flips needed to change D+R_1 to D+R_2.
+
+Example:
+```
+1 -> 111, 0 -> 000
+
+Distance = 3
+```
+
+- **Hamming distance** of a code: the minimum distance between any pair of
+  codewords.
+
+- Error detection: for a code of D+1, up to `d` errors will always be detected.
+- Error correction: for a code of distance 2D+1, up to `d` errors can always be
+  corrected by mapping to the closest codeword
+
+## Error Detection
+
+1. Parity bit: take D data bits, add 1 check bit that is the sum of the D bits,
+   modulo 2. (XOR)
+    - Example: `1001100 -> 3 mod 2 = 1 -> 10011001`
+2. Internet checksum: The 16bit one's complement of the one's complement sum of
+   all 16 bit words.
+    - Sum up all words, 16 bits a time, then negate it
+    - Finds all burst errors up to 16
+3. Cyclic Redundancy Check: generate `k` check bits such that the `n+k` bits
+   are evenly divisible by a generator `C`
+
+## Error Correction
+
+aaa
