@@ -99,4 +99,41 @@ Distance = 3
 
 ## Error Correction
 
-aaa
+- **Hamming code**: put check bits in positions `p` that are powers of 2,
+    starting with position 1. Check bit in position `p` is parity of positions
+    with a `p` term in their values
+    - Example:
+        ```
+        data = 0101, 3 check bits
+        7 bit code, check bits positions 1, 2, 4
+        Check 1 covers positions 1, 3, 5, 7
+        Check 2 covers positions 2, 3, 6, 7
+        Check 4 covers positions 4, 5, 6, 7
+
+        Final answer: 0100101
+        ```
+    - To decode, recompute check bits, arrange as a binary number, value
+      (syndrome) tells error position. Value of zero means no error. Otherwise
+      flip bit to correct.
+
+## Detection vs Correction
+
+Example: 1000 bit messages with a bit error rate (BER) of 1 in 10000.
+
+1. Assume bit errors are random
+    - Error correction, need ~10 check bits per message. Overhead: 10 check
+        bits
+    - Error detection, need ~1 check bits per message plus 1000 bit
+        retransmission 1/10 of the time. Overhead: 1 + 1000/10 = ~101 check
+        bits
+2. Assume errors come in bursts of 100 (only 1 or 2 messages in 1000 have errors)
+    - Correction: need >>100 check bits per message. Overhead: >100?
+    - Detection: need 32? check bits per message plus 1000 bit resend 2/1000 of
+        the time. Overhead: 32 + 1000/1000 * 2 = 34 bits
+
+Correction: needed when errors are expected, or when no time for
+retransmission. Used heavily in *physical layer*.
+
+Detection: more efficient when errors are not expected, or when errors are
+large when they do occur. Used in *link layer* and above for residual errors.
+
