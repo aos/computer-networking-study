@@ -96,10 +96,74 @@ More complicated than wired case:
     - OFDM modulation (except b)
 
 - Link layer
-    - multiple access uses CMSA/CA; RTS/CTS optional
+    - multiple access uses CSMA/CA; RTS/CTS optional
     - frames are ACKed and retransmitted with ARQ
     - uses 3 addresses (due to AP)
 
 ### 802.11 CSMA/CA for multiple access
 
 - Sender avoids collisions by inserting small random gaps
+
+## Content-Free Multiple Access
+
+- CSMA good under low load, grants immediate access, few collisions
+- CSMA bad under high load, high overhead as collisions are expected
+
+Enter turn-taking multiple access protocols.
+
+### Token Ring
+
+Arrange nodes in a ring; token rotates "permission to send" to each node in
+turn.
+
+Advantages:
+  - fixed overhead with no collisions (more efficient under load)
+  - regular chance to send with no unlucky nodes (predictable service)
+
+Disadvantages:
+  - Complex: token get lost/corrupt, higher overhead at low load
+
+## LAN Switches
+
+- Physical layer: **hubs**
+    - All ports are wired together; more convenient and reliable than a single
+      shared wire
+    - If a frame comes in, the frame is delivered to all other hosts
+
+### Inside a Switch
+
+- Uses frame addresses to connect input port to right output port
+- Multiple frames may be switched in parallel (using a switch *fabric*)
+- Ports are full-duplex (both input and output)
+- Need buffers for multiple inputs to send to one output
+- Sustained overload will fill buffer and lead to frame loss
+
+### Switch Forwarding
+
+**Backward learning**: switch forwards frames with a port/address table:
+1. To fill table, looks at source address of input frames
+2. To forward, sends to the port, or else broadcasts to all ports
+
+- How to solve forwarding loops?
+
+### Spanning Tree Solution
+
+Switches collectively find a **spanning tree** for the topology.
+- Subset of links that are a tree, no loops, reaches all switches
+- Broadcasts will go up to the root of the tree and down all the branches
+
+### Spanning Tree Algorithm
+
+1. Elect a root node of the tree (ie. switch with the lowest address)
+2. Grow tree as shortest distances from the root
+    - using lowest address to break distance ties
+3. Turn off ports for forwarding if they aren't on the spanning tree
+
+(Steps 1. and 2. occur in parallel)
+
+Details:
+- Each switch initially believes it is the root of the tree
+- Each switch sends period updates to neighbors with:
+    - Its address, address of root, distance (in hops) to root
+      Hi, I'm *C*, the root is *A*, it's 2 *hops* away - (C, A, 2)
+- Switches favor ports with shorter distances to lowest root
