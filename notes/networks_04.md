@@ -111,7 +111,7 @@ Example:
 ### ARP (Address Resolution Protocol)
 
 - Node needs link layer addresses to send a frame over the local link
-- Node maps a local IP address to its link layer address 
+- Node maps a local IP address to its link layer address
 
 ```
 Ethernet frame:
@@ -131,3 +131,56 @@ Ethernet frame:
 
 1. Node: `REQUEST` (broadcast)
 2. Target: `REPLY`
+
+## Packet Fragmentation
+
+- Packet size problem: different networks have different maximum packet sizes
+(MTU: maximum transmission unit)
+
+- Routers fragment packets that are too large to forward and receiving host
+  reassembles to reduce load on routers
+
+- Fragmentation header fields on IP packet (identification, fragment offset,
+  MF/DF control bits). MF - more fragments, DF - don't fragment
+
+### IPv4 Fragmentation Procedure
+
+Routers split a packet that is too large:
+
+- Copy ID header to pieces
+- Adjust length on pieces
+- Set offset to indicate position
+- Set MF (More Fragments) on all pieces except last
+
+## Path MTU Discovery
+
+- Discover the MTU that will fit (can avoid fragmentation)
+- Host tests path with large packet, routers provide feedback if too large:
+  they tell host what size would have fit
+- Implemented with ICMP (set DF bit in IP header to get feedback messages)
+
+## Error Handling with ICMP (Internet Control Message Protocol)
+
+- Companion protocol to IP
+
+### ICMP Errors
+
+When router encounters an error while forwarding:
+- sends an ICMP error report back to the IP source address
+
+### Message Format
+
+- Type, Code and Checksum
+- Often carry the start of the offending packet as payload
+- Carried in an IP packet
+
+### Traceroute
+
+IP header contains TTL (time to live) field
+- Decremented every router hop, with ICMP error if it hits zero
+- Protects against forwarding loops
+
+Traceroute sends probe packets increasing TTL starting from 1
+- ICMP errors identify routers on the path
+
+## IPv6
