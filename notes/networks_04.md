@@ -184,3 +184,39 @@ Traceroute sends probe packets increasing TTL starting from 1
 - ICMP errors identify routers on the path
 
 ## IPv6
+
+IP header now has source/destination address parts using 16 bytes.
+
+Also:
+- no checksum field
+- no length field
+- flow label (to group packets)
+
+### Transitioning
+
+Approaches:
+- dual stack (speak both IPv4 & IPv6)
+- translators (convert packets)
+- tunnels (carry IPv6 over IPv4)
+
+### Tunneling
+
+Tunnel carries IPv6 packets across IPv4 network.
+
+```
+---------------        -----------------------
+| IPv6 packet | --|--> | IPv4 | IPv6 packet ||
+---------------        -----------------------
+```
+
+## NAT (Network Address Translation)
+
+Middleboxes: sit inside the network but perform "more than IP" processing on
+packets to add new functionality.
+- NAT box, firewall / intrusion detection system
+
+### NAT box
+
+- Connects an internal network to an external network
+- Motivated by IP address scarcity
+- Keeps an internal/external table
